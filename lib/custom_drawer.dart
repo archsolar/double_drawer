@@ -82,9 +82,7 @@ class _DrawerStatefulState extends State<DrawerStateful>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     IconButton(
-                                      onPressed: () {
-                                        open();
-                                      },
+                                      onPressed: open,
                                       icon: const Icon(Icons.menu),
                                       iconSize: 40,
                                     )
@@ -127,10 +125,6 @@ class _DrawerStatefulState extends State<DrawerStateful>
 
   close() {
     _controller.reverse();
-  }
-
-  stopAnim() {
-    _controller.stop();
   }
 
   Container backgroundPage() {
