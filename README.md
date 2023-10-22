@@ -1,16 +1,15 @@
 # custom_drawer
 
-A new Flutter project.
+A simple alternative to drawer, that let's you grab a whole customizable page! 
+https://github.com/archsolar/custom_drawer/assets/46627284/61ff7485-0bb2-41e0-8b65-bfefd3261141
 
 ## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+simply put your widgets where you want them:
+```dart
+  Widget build(BuildContext context) {
+    return DrawerStateful(
+      leftDrawer: yourLeftDrawer(),
+      mainPage: yourMainPage(),
+      drawerInfo: DrawerInfo(),
+    );
+```
