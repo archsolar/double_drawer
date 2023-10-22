@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-//drawer that pulls a full page instead.
+//drawer that pulls a full page.
 class DrawerStateful extends StatefulWidget {
   final Widget leftDrawer;
   final Widget mainPage;
@@ -20,113 +20,118 @@ class DrawerStateful extends StatefulWidget {
 
 class _DrawerStatefulState extends State<DrawerStateful>
     with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 246),
+    );
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     {
-      //the shorted of height/width will be used to calculate stretch.
       var x =
           MediaQuery.of(context).size.width < MediaQuery.of(context).size.height
               ? MediaQuery.of(context).size.width
               : MediaQuery.of(context).size.height;
       widget.drawerInfo.setStretch(x * 0.75);
+      _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
     }
-    return Stack(
-      children: [
-        backgroundPage(),
-        // Page One (drawer)
-        Container(
-            width: widget.drawerInfo.getStretch(),
-            height: MediaQuery.of(context).size.height,
-            color: Colors.blue,
-            child: widget.leftDrawer),
-        Positioned(
-          top: 0,
-          left: widget.drawerInfo.getLeft(),
-          //TODO make drag the width of whole screen
-          child: GestureDetector(
-            onHorizontalDragUpdate: (details) {
-              setState(() {
-                print("chaning");
-                widget.drawerInfo.setLeft(details.delta.dx);
-              });
-            },
-            onHorizontalDragEnd: (details) {
-              print("drag ended");
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
+    return GestureDetector(
+      onHorizontalDragUpdate: _move,
+      onHorizontalDragEnd: _settle,
+      child: Stack(
+        children: [
+          backgroundPage(),
+          Container(
+              width: widget.drawerInfo.getStretch(),
               height: MediaQuery.of(context).size.height,
-              color: Colors.green,
-              child: Scaffold(
-                backgroundColor: Colors.green,
-                appBar: PreferredSize(
-                  preferredSize: const Size.fromHeight(80),
+              color: Colors.blue,
+              child: widget.leftDrawer),
+          AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                return Positioned(
+                  top: 0,
+                  left: _controller.value * widget.drawerInfo.getStretch(),
+                  //TODO make drag the width of whole screen
                   child: Container(
-                      color: Colors.green[800],
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 35, 12, 12),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  openDrawer();
-                                },
-                                icon: const Icon(Icons.menu),
-                                iconSize: 40,
-                              )
-                            ]),
-                      )),
-                ),
-                body: Center(
-                  child: widget.mainPage,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.green,
+                    child: Scaffold(
+                      backgroundColor: Colors.green,
+                      appBar: PreferredSize(
+                        preferredSize: const Size.fromHeight(80),
+                        child: Container(
+                            color: Colors.green[800],
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(12, 35, 12, 12),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        open();
+                                      },
+                                      icon: const Icon(Icons.menu),
+                                      iconSize: 40,
+                                    )
+                                  ]),
+                            )),
+                      ),
+                      body: widget.mainPage,
+                    ),
+                  ),
+                );
+              }),
+        ],
+      ),
     );
   }
 
-  //TODO open drawer slowly instead of instantly.
-  openDrawer() {
-    setState(() {
-      // _controller.forward();
-
-      widget.drawerInfo
-          .setLeft(widget.drawerInfo.getStretch() /* * _controller.value */);
-    });
+  void _move(DragUpdateDetails details) {
+    _controller.value += details.delta.dx / widget.drawerInfo.getStretch();
   }
 
-// Define a function to open the drawer with a delay
-  void openDrawerWithDelay(int numberOfTimes, Duration delay) {
-    int count = 0;
+  void _settle(DragEndDetails details) {
+    const double kMinFlingVelocity = 365.0;
 
-    void open() {
-      openDrawer(); // Call your openDrawer function here
+    //copied from drawer.dart
+    if (details.velocity.pixelsPerSecond.dx.abs() >= kMinFlingVelocity) {
+      double visualVelocity =
+          details.velocity.pixelsPerSecond.dx / widget.drawerInfo.getStretch();
 
-      if (count < numberOfTimes - 1) {
-        Future.delayed(delay, () {
-          open();
-        });
-      }
-
-      count++;
+      _controller.fling(velocity: visualVelocity);
+    } else if (_controller.value > 0.5) {
+      open();
+    } else {
+      close();
     }
+  }
 
-    open();
+  open() {
+    _controller.forward();
+  }
+
+  close() {
+    _controller.reverse();
+  }
+
+  stopAnim() {
+    _controller.stop();
   }
 
   Container backgroundPage() {
@@ -139,7 +144,6 @@ class _DrawerStatefulState extends State<DrawerStateful>
 }
 
 class DrawerInfo {
-  double _left = 0;
   double _stretch = 0;
   var isDrawerOpen = false;
 
@@ -149,19 +153,5 @@ class DrawerInfo {
 
   getStretch() {
     return _stretch;
-  }
-
-  setLeft(double x) {
-    _left = (_left + x).clamp(0, _stretch);
-    print(_left);
-  }
-
-  getLeft() {
-    return _left;
-  }
-
-  //get the difference between _left and _stretch
-  getDifference() {
-    return _left - _stretch;
   }
 }

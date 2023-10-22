@@ -12,7 +12,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("logging started");
     return const MaterialApp(
       home: DraggableStackPage(),
     );
