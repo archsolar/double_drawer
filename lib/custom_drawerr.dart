@@ -28,7 +28,7 @@ class _DrawerStatefulState extends State<DrawerStateful>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 246),
+      duration: const Duration(milliseconds: 246),
     );
   }
 
@@ -65,7 +65,6 @@ class _DrawerStatefulState extends State<DrawerStateful>
                 return Positioned(
                   top: 0,
                   left: _controller.value * widget.drawerInfo.getStretch(),
-                  //TODO make drag the width of whole screen
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,

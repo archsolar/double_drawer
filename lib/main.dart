@@ -1,9 +1,7 @@
 import 'package:custom_drawer/custom_drawerr.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer';
 
 void main() {
-  log("main");
   runApp(const MyApp());
 }
 
@@ -31,9 +29,11 @@ class DraggableStackPageState extends State<DraggableStackPage> {
   Widget build(BuildContext context) {
     return DrawerStateful(
       leftDrawer: pageOne(),
-      mainPage: const Text(
-        "CHAT",
-        style: TextStyle(fontSize: 24.0),
+      mainPage: const Center(
+        child: Text(
+          "Main Page",
+          style: TextStyle(fontSize: 24.0),
+        ),
       ),
       drawerInfo: DrawerInfo(),
     );
@@ -42,7 +42,7 @@ class DraggableStackPageState extends State<DraggableStackPage> {
   Center pageOne() {
     return const Center(
       child: Text(
-        "Page One",
+        "Side",
         style: TextStyle(fontSize: 24.0),
       ),
     );
