@@ -28,18 +28,21 @@ class DraggableStackPageState extends State<DraggableStackPage> {
   @override
   Widget build(BuildContext context) {
     return DrawerStateful(
-      leftDrawer: pageOne(),
-      mainPage: const Center(
-        child: Text(
-          "Main Page",
-          style: TextStyle(fontSize: 24.0),
-        ),
-      ),
-      drawerInfo: DrawerInfo(),
+      leftDrawer: yourLeftDrawer(),
+      mainPage: yourMainPage(),
     );
   }
 
-  Center pageOne() {
+  Center yourMainPage() {
+    return const Center(
+      child: Text(
+        "Main Page",
+        style: TextStyle(fontSize: 24.0),
+      ),
+    );
+  }
+
+  Center yourLeftDrawer() {
     return const Center(
       child: Text(
         "Side",

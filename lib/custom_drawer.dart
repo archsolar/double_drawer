@@ -53,7 +53,7 @@ class _DrawerStatefulState extends State<DrawerStateful>
       onHorizontalDragEnd: _settle,
       child: Stack(
         children: [
-          backgroundPage(),
+          // backgroundPage(),
           Container(
               width: widget.drawerInfo.getStretch(),
               height: MediaQuery.of(context).size.height,
@@ -136,9 +136,10 @@ class _DrawerStatefulState extends State<DrawerStateful>
   }
 }
 
+///holds drawer info
 class DrawerInfo {
   double _stretch = 0;
-  var isDrawerOpen = false;
+  // var isDrawerOpen = false;
 
   setStretch(double x) {
     _stretch = x;
