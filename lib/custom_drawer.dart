@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
-//drawer that pulls a full page.
+///drawer that pulls a full page.
 class DrawerStateful extends StatefulWidget {
+  //drawer that comes from the left
   final Widget leftDrawer;
+  //the main page, that can be dragged to the right
   final Widget mainPage;
+  //holds data related to the drawer
   final DrawerInfo drawerInfo;
 
   DrawerStateful({
@@ -41,19 +44,21 @@ class _DrawerStatefulState extends State<DrawerStateful>
   @override
   Widget build(BuildContext context) {
     {
+      //grabs 75% of the screen width. ALWAYS grabs WIDTH of physical form,
+      //regardless if phone is in portrait or landscape.
       var x =
           MediaQuery.of(context).size.width < MediaQuery.of(context).size.height
               ? MediaQuery.of(context).size.width
               : MediaQuery.of(context).size.height;
       widget.drawerInfo.setStretch(x * 0.75);
-      _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+      //sets up animation from 0.0 to 1.0
+      _animation = Tween<double>(begin: 0, end: 1.0).animate(_controller);
     }
     return GestureDetector(
       onHorizontalDragUpdate: _move,
       onHorizontalDragEnd: _settle,
       child: Stack(
         children: [
-          // backgroundPage(),
           Container(
               width: widget.drawerInfo.getStretch(),
               height: MediaQuery.of(context).size.height,
@@ -99,10 +104,12 @@ class _DrawerStatefulState extends State<DrawerStateful>
     );
   }
 
+  //finger drag proportional to the getStretch
   void _move(DragUpdateDetails details) {
     _controller.value += details.delta.dx / widget.drawerInfo.getStretch();
   }
 
+  //settles the drawer where it belongs, using velocity and location
   void _settle(DragEndDetails details) {
     const double kMinFlingVelocity = 365.0;
 
@@ -119,10 +126,12 @@ class _DrawerStatefulState extends State<DrawerStateful>
     }
   }
 
+  //open drawer
   open() {
     _controller.forward();
   }
 
+  //close drawer
   close() {
     _controller.reverse();
   }
