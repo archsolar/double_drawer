@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 
 ///drawer that pulls a full page.
 class DrawerStateful extends StatefulWidget {
-  //drawer that comes from the left
+  //.drawer that comes from the left
   final Widget leftDrawer;
-  //the main page, that can be dragged to the right
-  final Widget mainPage;
-  //holds data related to the drawer
-  final DrawerInfo drawerInfo;
 
-  DrawerStateful({
-    Key? key,
-    required this.leftDrawer,
-    required this.mainPage,
-    DrawerInfo? drawerInfo,
-  })  : drawerInfo = drawerInfo ?? DrawerInfo(),
-        super(key: key);
+  ///the main page, that can be dragged to the right
+  final Widget mainPage;
+
+  ///if null => drawerTheme if null => uses 304.0
+  final double? width;
+
+  DrawerStateful(
+      {Key? key, required this.leftDrawer, required this.mainPage, this.width})
+      : super(key: key);
 
   @override
   State<DrawerStateful> createState() => _DrawerStatefulState();
@@ -25,6 +23,7 @@ class _DrawerStatefulState extends State<DrawerStateful>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  double width = 0;
 
   @override
   void initState() {
@@ -44,13 +43,8 @@ class _DrawerStatefulState extends State<DrawerStateful>
   @override
   Widget build(BuildContext context) {
     {
-      //grabs 75% of the screen width. ALWAYS grabs WIDTH of physical form,
-      //regardless if phone is in portrait or landscape.
-      var x =
-          MediaQuery.of(context).size.width < MediaQuery.of(context).size.height
-              ? MediaQuery.of(context).size.width
-              : MediaQuery.of(context).size.height;
-      widget.drawerInfo.setStretch(x * 0.75);
+      //use widget.width if null use drawerTheme.width else use 304.0
+      width = widget.width ?? DrawerTheme.of(context).width ?? 304.0;
       //sets up animation from 0.0 to 1.0
       _animation = Tween<double>(begin: 0, end: 1.0).animate(_controller);
     }
@@ -59,19 +53,30 @@ class _DrawerStatefulState extends State<DrawerStateful>
       onHorizontalDragEnd: _settle,
       child: Stack(
         children: [
-          Container(
-              width: widget.drawerInfo.getStretch(),
-              height: MediaQuery.of(context).size.height,
-              color: Colors.blue,
-              child: widget.leftDrawer),
+          //contains left drawer
+          Column(
+            children: [
+              Expanded(
+                child: Container(
+                  width: width, // Controls the horizontal scaling
+                  color: Colors.blue,
+                  child: widget.leftDrawer,
+                ),
+              ),
+              // Add other widgets for the main content here
+            ],
+          ),
           AnimatedBuilder(
               animation: _animation,
               builder: (context, child) {
+                //contains main page.
                 return Positioned(
                   top: 0,
-                  left: _controller.value * widget.drawerInfo.getStretch(),
+                  left: _controller.value * width,
                   child: Container(
                     width: MediaQuery.of(context).size.width,
+                    //page should be height of screen.
+                    //TODO can I replace this?
                     height: MediaQuery.of(context).size.height,
                     color: Colors.green,
                     child: Scaffold(
@@ -106,7 +111,7 @@ class _DrawerStatefulState extends State<DrawerStateful>
 
   //finger drag proportional to the getStretch
   void _move(DragUpdateDetails details) {
-    _controller.value += details.delta.dx / widget.drawerInfo.getStretch();
+    _controller.value += details.delta.dx / width;
   }
 
   //settles the drawer where it belongs, using velocity and location
@@ -115,8 +120,7 @@ class _DrawerStatefulState extends State<DrawerStateful>
 
     //copied from drawer.dart
     if (details.velocity.pixelsPerSecond.dx.abs() >= kMinFlingVelocity) {
-      double visualVelocity =
-          details.velocity.pixelsPerSecond.dx / widget.drawerInfo.getStretch();
+      double visualVelocity = details.velocity.pixelsPerSecond.dx / width;
 
       _controller.fling(velocity: visualVelocity);
     } else if (_controller.value > 0.5) {
@@ -142,19 +146,5 @@ class _DrawerStatefulState extends State<DrawerStateful>
       height: MediaQuery.of(context).size.height,
       color: const Color.fromARGB(255, 41, 1, 12),
     );
-  }
-}
-
-///holds drawer info
-class DrawerInfo {
-  double _stretch = 0;
-  // var isDrawerOpen = false;
-
-  setStretch(double x) {
-    _stretch = x;
-  }
-
-  getStretch() {
-    return _stretch;
   }
 }
